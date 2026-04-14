@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YCAP Wellbeing - Edisi 3.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff00ff;
+            --dark-bg: #030512;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            font-size: 1.15rem;
+        }
+
+        h1, h2, h3, .font-futuristic {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Efek Latar Belakang */
+        .blob {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.1;
+            animation: move 25s infinite alternate;
+        }
+        .blob-cyan { background: var(--neon-cyan); top: -150px; left: -150px; }
+        .blob-magenta { background: var(--neon-magenta); bottom: -150px; right: -150px; animation-delay: -7s; }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(150px, 150px) scale(1.3); }
+        }
+
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Gaya Tombol Likert */
+        .likert-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 95px;
+            color: #ffffff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .likert-btn:hover {
+            border-color: rgba(0, 243, 255, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .likert-btn.active {
+            background: var(--neon-cyan);
+            color: #000000;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 25px 8px rgba(0, 243, 255, 0.7);
+            font-weight: 800;
+        }
+
+        .btn-futuristic {
+            background: linear-gradient(90deg, #00f3ff, #ff00ff);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+        .btn-futuristic:hover {
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-futuristic:disabled {
+            background: #1a1a1a;
+            color: #444;
+            box-shadow: none;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .checkbox-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            border-radius: 16px;
+        }
+        .checkbox-card.active {
+            border-color: var(--neon-magenta);
+            background: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        input, select, textarea {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border-radius: 12px !important;
+            font-size: 1.2rem !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--neon-cyan) !important;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3) !important;
+            outline: none;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 243, 255, 0.05);
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 100;
+            animation: scan 10s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+
+        .loader {
+            border: 5px solid rgba(0, 243, 255, 0.1);
+            border-left: 5px solid var(--neon-cyan);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div class="blob blob-cyan"></div>
+    <div class="blob blob-magenta"></div>
+    <div class="scanline"></div>
+
+    <!-- Header -->
+    <header class="border-b border-cyan-500/10 py-5 px-8 flex justify-between items-center sticky top-0 z-40 bg-black/40 backdrop-blur-xl">
+        <div class="flex items-center space-x-5">
+            <div class="relative group">
+                <div class="absolute inset-0 bg-cyan-400 blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <img src="https://smartcap.or.id/assets/logo.png" class="h-12 w-auto relative z-10" alt="Logo YCAP" onerror="this.src='https://via.placeholder.com/50x50?text=YCAP'">
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-widest neon-text-cyan leading-none">SEKOLAH YCAP</h1>
+                <p class="text-[11px] text-magenta-400 font-bold tracking-[4px] uppercase opacity-80">Survey Wellbeing 3.0</p>
+            </div>
+        </div>
+        <div class="text-right hidden sm:block">
+            <div class="text-[12px] font-bold text-cyan-500 mb-1" id="global-step-indicator">SURVEY_01/11</div>
+            <div class="w-48 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div id="main-progress" class="h-full bg-cyan-400 shadow-[0_0_15px_#00f3ff] transition-all duration-1000" style="width: 10%"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center py-12 px-4 relative">
+        <div class="max-w-4xl w-full glass-panel rounded-[2.5rem] overflow-hidden flex flex-col relative">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+            
+            <div id="form-content" class="p-8 md:p-14 flex-grow">
+                <!-- Konten dinamis -->
+            </div>
+
+            <div id="nav-container" class="p-8 border-t border-white/5 flex justify-between items-center bg-white/5">
+                <button id="prev-btn" onclick="goToPrevStep()" class="px-8 py-3 text-cyan-500 font-bold hover:neon-text-cyan transition-all invisible uppercase tracking-[3px] text-sm">
+                    <i class="fas fa-chevron-left mr-2"></i> Mundur
+                </button>
+                <button id="next-btn" onclick="goToNextStep()" class="btn-futuristic px-14 py-5 text-black font-black rounded-xl tracking-[4px] uppercase text-sm">
+                    LANJUT_SURVEY <i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+
+            <div id="loading-ui" class="hidden absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 p-8 text-center">
+                <div class="loader mb-6"></div>
+                <h3 class="text-2xl font-bold neon-text-cyan mb-2 uppercase">Mengirim Transmisi...</h3>
+                <p class="text-gray-400 text-sm font-mono tracking-widest">MENYAMBUNGKAN KE MAINFRAME YCAP</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="success-screen" class="fixed inset-0 bg-[#030512] z-50 hidden flex flex-col items-center justify-center p-8 text-center">
+        <div class="relative mb-12">
+            <div class="absolute inset-0 bg-cyan-500 blur-3xl opacity-20"></div>
+            <div class="w-32 h-32 border-2 border-magenta-500 rounded-full flex items-center justify-center text-5xl text-magenta-400 animate-pulse">
+                <i class="fas fa-terminal"></i>
+            </div>
+        </div>
+        <h2 class="text-5xl font-bold neon-text-cyan mb-6 tracking-widest">TRANSMISI SELESAI</h2>
+        <p class="text-2xl text-gray-400 max-w-sm mb-12 font-medium leading-relaxed">Seluruh data asesmen telah berhasil diunggah ke mainframe YCAP. Sistem akan memproses laporan Anda segera.</p>
+        <button onclick="location.reload()" class="btn-futuristic px-14 py-5 text-black font-black rounded-full tracking-widest uppercase">Mulai Ulang Sistem</button>
+    </div>
+
+    <footer class="bg-black/60 py-4 px-8 border-t border-white/5 flex justify-between items-center text-[11px] tracking-[3px] text-gray-500 uppercase">
+        <div class="flex space-x-8">
+            <button onclick="toggleModal('termsModal')" class="hover:text-cyan-400 transition-colors">Dokumen</button>
+            <button onclick="toggleModal('privacyModal')" class="hover:text-magenta-400 transition-colors">Privasi</button>
+        </div>
+        <div class="opacity-40">PROTOKOL_WELLBEING_YCAP</div>
+    </footer>
+
+    <div id="termsModal" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-4 z-50 backdrop-blur-md">
+        <div class="glass-panel border-cyan-500/40 rounded-2xl max-w-md w-full p-8">
+            <h3 class="text-xl font-bold neon-text-cyan mb-4 uppercase">Syarat & Ketentuan</h3>
+            <p class="text-lg text-gray-400 leading-relaxed mb-8">Informasi yang Anda masukkan digunakan untuk analisis wellbeing sekolah dan akan dijaga kerahasiaannya oleh sistem YCAP.</p>
+            <button onclick="toggleModal('termsModal')" class="w-full py-4 border border-cyan-500/30 text-cyan-400 font-bold hover:bg-cyan-500/10 rounded-xl transition-all uppercase">Tutup Terminal</button>
+        </div>
+    </div>
+
+    <script>
+        // INTEGRASI TAUTAN GOOGLE APPS SCRIPT
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznzzGXemmXwM-nhb5gxqhrnB_OQVE9a9TMvKtoFGhhaZSiyH_lyquRPibko9ygk7ZU/exec";
+
+        const surveyData = {
+            identity: { gender: "", grade: "" },
+            steps: [
+                { title: "AKSES: IDENTITAS", type: "identity", instruction: "Petunjuk: Bacalah setiap pernyataan dengan baik dan pilih jawaban yang paling sesuai dengan kondisi Anda.", questions: [] },
+                { title: "01: SIKAP_POSITIF", description: "1 = Sangat tidak setuju → 5 = Sangat setuju", type: "likert", questions: [
+                    { id: "1.1", text: "Saya senang pergi ke sekolah" }, { id: "1.2", text: "Saya senang berada di sekolah" }, { id: "1.3", text: "Saya merasa nyaman di sekolah ini" }, { id: "1.4", text: "Saya senang menghabiskan waktu di sekolah" }, { id: "1.5", text: "Saya belajar banyak hal di sekolah ini" },
+                    { id: "1.6", text: "Saya merasa aman selama berada di sekolah." }, { id: "1.7", text: "Sekolah memiliki aturan yang jelas untuk melindungi siswa." }, { id: "1.8", text: "Saya tidak takut mengalami kekerasan di sekolah." }, { id: "1.9", text: "Sekolah menangani masalah siswa dengan baik." }, { id: "1.10", text: "Saya tahu harus melapor kepada siapa jika mengalami masalah." },
+                    { id: "1.11", text: "Ruang kelas saya nyaman untuk belajar." }, { id: "1.12", text: "Lingkungan sekolah saya bersih dan aman." }, { id: "1.13", text: "Fasilitas sekolah mendukung kegiatan belajar saya." }, { id: "1.14", text: "Suasana kelas mendukung saya untuk aktif belajar." }, { id: "1.15", text: "Saya dapat berkonsentrasi dengan baik saat belajar di sekolah." }
+                ]},
+                { title: "02: PENGALAMAN_POSITIF", description: "1 = Sangat tidak setuju → 5 = Sangat setuju", type: "likert", questions: [
+                    { id: "2.1", text: "Saya mempelajari hal-hal yang penting di sekolah" }, { id: "2.2", text: "Guru menghormati pendapat saya" }, { id: "2.3", text: "Saya mendapat perhatian dari teman sekelas" }, { id: "2.4", text: "Guru memuji saya atas perilaku atau pekerjaan yang baik" }, { id: "2.5", text: "Saya merasa bangga dengan hasil kerja saya di sekolah" },
+                    { id: "2.6", text: "Saya memiliki kesempatan untuk menyampaikan pendapat di sekolah." }, { id: "2.7", text: "Saya terlibat dalam kegiatan sekolah (organisasi, ekstrakurikuler, dll)." }, { id: "2.8", text: "Sekolah memberikan kesempatan bagi siswa untuk berpartisipasi aktif." }, { id: "2.9", text: "Pendapat siswa dipertimbangkan dalam pengambilan keputusan." }, { id: "2.10", text: "Saya merasa menjadi bagian penting dari sekolah." },
+                    { id: "2.11", text: "Saya memiliki teman yang dapat saya percaya di sekolah." }, { id: "2.12", text: "Saya merasa diterima oleh teman-teman saya." }, { id: "2.13", text: "Saya dapat bekerja sama dengan teman dalam kegiatan kelompok." }, { id: "2.14", text: "Saya tidak merasa dikucilkan atau di-bully di sekolah." }, { id: "2.15", text: "Saya merasa hubungan saya dengan teman-teman baik." }
+                ]},
+                { title: "03: KEPERCAYAAN_DIRI", description: "1 = Sangat tidak setuju → 5 = Sangat setuju", type: "likert", questions: [
+                    { id: "3.1", text: "Saya mampu memenuhi tuntutan sekolah" }, { id: "3.2", text: "Saya dapat menyelesaikan pelajaran dengan baik" }, { id: "3.3", text: "Saya mampu belajar sebaik siswa lainnya" }, { id: "3.4", text: "Saya merasa berkembang di sekolah" }, { id: "3.5", text: "Saya merasa positif tentang masa depan sekolah saya" },
+                    { id: "3.6", text: "Saya merasa mampu mengikuti pelajaran di sekolah." }, { id: "3.7", text: "Saya merasa percaya diri dalam mengerjakan tugas." }, { id: "3.8", text: "Saya mendapatkan bantuan ketika mengalami kesulitan belajar." }, { id: "3.9", text: "Beban tugas sekolah masih dapat saya kelola dengan baik." }, { id: "3.10", text: "Saya merasa termotivasi untuk belajar." }
+                ]},
+                { title: "04: TINGKAT_KHAWATIR", description: "Seberapa sering Anda khawatir: Sangat sering → Tidak pernah", type: "likert", reverseLabel: true, questions: [
+                    { id: "4.1", text: "Tentang sekolah secara umum" }, { id: "4.2", text: "Tentang masa depan setelah lulus" }, { id: "4.3", text: "Tentang nilai sekolah" }, { id: "4.4", text: "Karena guru" }, { id: "4.5", text: "Tentang pekerjaan rumah" }
+                ]},
+                { title: "05: GEJALA_STRES", description: "Seberapa sering Anda mengalami: Sangat sering → Tidak pernah", type: "likert", reverseLabel: true, questions: [
+                    { id: "5.1", text: "Sulit tidur karena memikirkan sekolah" }, { id: "5.2", text: "Tidak nafsu makan karena stres sekolah" }, { id: "5.3", text: "Merasa pusing di kelas" }, { id: "5.4", text: "Jantung berdebar saat dipanggil guru" }, { id: "5.5", text: "Tidak masuk sekolah karena merasa tidak enak badan" }
+                ]},
+                { title: "06: GANGGUAN_SOSIAL", description: "Seberapa sering Anda mengalami: Sangat sering → Tidak pernah", type: "likert", reverseLabel: true, questions: [
+                    { id: "6.1", text: "Masalah di kelas" }, { id: "6.2", text: "Masalah dengan teman sekolah" }, { id: "6.3", text: "Merasa seperti orang asing di sekolah" }, { id: "6.4", text: "Tidak bisa tidur karena masalah dengan teman" }, { id: "6.5", text: "Konflik dengan teman sekelas" }
+                ]},
+                { title: "07: KESEJAHTERAAN_FISIK", description: "1 = Sangat tidak setuju → 5 = Sangat setuju", type: "likert", questions: [
+                    { id: "7.1", text: "Saya merasa sehat saat mengikuti kegiatan sekolah." }, { id: "7.2", text: "Sekolah menyediakan fasilitas yang mendukung kesehatan siswa." }, { id: "7.3", text: "Saya memiliki waktu istirahat yang cukup di sekolah." }, { id: "7.4", text: "Saya merasa nyaman dengan kondisi fisik lingkungan sekolah." }, { id: "7.5", text: "Saya tidak merasa terlalu lelah selama kegiatan sekolah." },
+                    { id: "7.6", text: "Saya memiliki waktu yang cukup untuk belajar dan beristirahat." }, { id: "7.7", text: "Saya tidak merasa terlalu tertekan dengan tugas sekolah." }, { id: "7.8", text: "Saya masih memiliki waktu untuk melakukan hobi." }, { id: "7.9", text: "Saya dapat mengatur waktu saya dengan baik." }, { id: "7.10", text: "Kegiatan sekolah tidak mengganggu keseimbangan hidup saya." }
+                ]},
+                { title: "SURVEY: DATA_ASRAMA", description: "1 = Sangat tidak setuju → 5 = Sangat setuju", type: "likert", questions: [
+                    { id: "8.1", text: "Saya senang tinggal di asrama" }, { id: "8.2", text: "Saya merasa nyaman di asrama" }, { id: "8.3", text: "Saya memiliki teman baik di asrama" }, { id: "8.4", text: "Saya memiliki kesempatan rekreasi dan olahraga yang cukup" }, { id: "8.5", text: "Fasilitas di asrama dalam kondisi baik" },
+                    { id: "8.6", text: "Saya merasa aman tinggal di asrama." }, { id: "8.7", text: "Aturan asrama membantu menjaga keamanan siswa." }, { id: "8.8", text: "Barang pribadi saya aman di asrama." }, { id: "8.9", text: "Saya memiliki hubungan yang baik dengan teman sekamar." }, { id: "8.10", text: "Saya merasa diterima oleh penghuni asrama lainnya." },
+                    { id: "8.11", text: "Saya dapat berkomunikasi dengan baik dengan teman di asrama." }, { id: "8.12", text: "Saya jarang mengalami konflik dengan teman asrama." }, { id: "8.13", text: "Suasana kebersamaan di asrama terasa menyenangkan." }, { id: "8.14", text: "Saya merasa nyaman berbicara dengan pembina asrama." }, { id: "8.15", text: "Pembina memberikan solusi saat saya mengalami masalah." },
+                    { id: "8.16", text: "Pembina memperlakukan semua siswa secara adil." }, { id: "8.17", text: "Aturan di asrama jelas dan mudah dipahami." }, { id: "8.18", text: "Aturan asrama diterapkan secara konsisten." }, { id: "8.19", text: "Saya dapat mengikuti aturan asrama dengan baik." }, { id: "8.20", text: "Sanksi yang diberikan di asrama terasa adil." },
+                    { id: "8.22", text: "Saya memiliki waktu istirahat yang cukup di asrama." }, { id: "8.23", text: "Saya dapat menyesuaikan diri dengan kehidupan asrama." }, { id: "8.24", text: "Teman-teman menghargai batasan pribadi saya." }, { id: "8.25", text: "Saya dapat beristirahat tanpa gangguan." }
+                ]},
+                { title: "09 & 10: METRIK_UTAMA", type: "mixed", questions: [
+                    { id: "stress", type: "multi", text: "Sumber Stres Utama (Pilih Maks 2)", options: ["Pelajaran sekolah", "Lingkungan sosial (teman, guru)", "Pekerjaan rumah", "Kegiatan rekreasi / olahraga", "Peraturan di sekolah", "Peraturan di asrama", "Tidak ada yang mengganggu saya", "Lainnya"]},
+                    { id: "food", type: "single", text: "Kondisi Konsumsi Makanan (Pilih satu)", options: ["Sangat kurang", "Agak kurang", "Kurang", "Cukup", "Sangat cukup"]}
+                ]},
+                { title: "11: LOG_UMPAN_BALIK", type: "open", questions: [
+                    { id: "10", text: "Apa yang belum ada di sekolah ini, tetapi kamu ingin ada?" }, { id: "11", text: "Apa yang menurut kamu belum baik dan perlu diperbaiki?" }, { id: "12", text: "Tulis hal lain yang ingin kamu sampaikan tentang sekolah atau asrama:" }, { id: "13", text: "Sebutkan 3 hal yang kamu paling sukai di sekolah atau asrama" }, { id: "14", text: "Sebutkan 3 hal yang kamu paling tidak sukai di sekolah atau asrama" }
+                ]}
+            ]
+        };
+
+        const likertLabels = ["Sangat tidak setuju", "Tidak setuju", "Setuju sebagian", "Setuju", "Sangat setuju"];
+        const frequencyLabels = ["Sangat sering", "Sering", "Kadang-kadang", "Jarang", "Tidak pernah"];
+
+        let currentStepIndex = 0;
+        let userResponses = {};
+
+        function renderStep() {
+            const step = surveyData.steps[currentStepIndex];
+            const container = document.getElementById('form-content');
+            
+            document.getElementById('global-step-indicator').innerText = `SURVEY_${(currentStepIndex+1).toString().padStart(2, '0')}/${surveyData.steps.length}`;
+            document.getElementById('main-progress').style.width = `${((currentStepIndex + 1) / surveyData.steps.length) * 100}%`;
+            
+            let html = `<div>
+                <h2 class="text-4xl font-bold neon-text-magenta mb-4">${step.title}</h2>
+                ${step.instruction ? `<p class="text-xl text-white bg-cyan-500/10 border-l-4 border-cyan-500 p-4 mb-8 font-medium italic">>> ${step.instruction}</p>` : ''}
+                ${step.description ? `<p class="text-sm text-cyan-400 font-mono mb-8 tracking-[2px] uppercase opacity-70">>> ${step.description}</p>` : ''}
+                <div class="space-y-14 mt-4">`;
+
+            if (step.type === 'identity') {
+                html += `
+                    <div class="space-y-12">
+                        <div>
+                            <label class="block text-sm font-bold text-cyan-500 mb-5 uppercase tracking-[3px]">Pilih_Jenis_Kelamin</label>
+                            <select onchange="saveIdentity('gender', this.value)" class="w-full p-6 rounded-xl text-xl">
+                                <option value="">Pilih...</option>
+                                <option value="Laki-laki" ${surveyData.identity.gender === 'Laki-laki' ? 'selected' : ''}>Laki-laki</option>
+                                <option value="Perempuan" ${surveyData.identity.gender === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-cyan-500 mb-5 uppercase tracking-[3px]">Pilih_Kelas</label>
+                            <select onchange="saveIdentity('grade', this.value)" class="w-full p-6 rounded-xl text-xl">
+                                <option value="">Pilih...</option>
+                                ${[7,8,9,10,11,12].map(k => `<option value="Kelas ${k}" ${surveyData.identity.grade === `Kelas ${k}` ? 'selected' : ''}>Kelas ${k}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (step.type === 'likert') {
+                const labels = step.reverseLabel ? frequencyLabels : likertLabels;
+                step.questions.forEach(q => {
+                    html += `
+                        <div class="pb-12 border-b border-white/5 last:border-0">
+                            <p class="text-2xl text-white font-medium mb-10 leading-relaxed">
+                                <span class="text-cyan-500 mr-5 font-mono text-3xl">${q.id}</span> ${q.text}
+                            </p>
+                            <div class="grid grid-cols-5 gap-4">
+                                ${[1, 2, 3, 4, 5].map(val => `
+                                    <button onclick="saveResponse('${q.id}', ${val})" 
+                                        class="likert-btn p-3 transition-all ${userResponses[q.id] === val ? 'active' : ''}">
+                                        <span class="text-[12px] uppercase leading-tight tracking-wider font-bold">${labels[val-1]}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else if (step.type === 'mixed') {
+                step.questions.forEach(q => {
+                    html += `<div><p class="text-2xl text-white font-bold mb-10 flex items-center tracking-wide"><i class="fas fa-arrow-right text-cyan-500 mr-5 text-xl"></i>${q.text}</p>`;
+                    if (q.type === 'multi') {
+                        html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">`;
+                        q.options.forEach(opt => {
+                            const isSelected = (userResponses[q.id] || []).includes(opt);
+                            html += `
+                                <div class="flex flex-col space-y-4">
+                                    <div onclick="toggleMulti('${q.id}', '${opt}')" 
+                                        class="checkbox-card p-6 rounded-2xl cursor-pointer flex items-center space-x-6 transition-all ${isSelected ? 'active' : ''}">
+                                        <div class="w-6 h-6 rounded border-2 flex items-center justify-center ${isSelected ? 'border-magenta-500 bg-magenta-500' : 'border-white/20 bg-white/5'}">
+                                            ${isSelected ? '<i class="fas fa-check text-[14px] text-white"></i>' : ''}
+                                        </div>
+                                        <span class="text-xl font-medium ${isSelected ? 'text-white' : 'text-gray-400'}">${opt}</span>
+                                    </div>
+                                    ${opt === 'Lainnya' && isSelected ? `
+                                        <div class="animate-fadeIn">
+                                            <input type="text" 
+                                                placeholder="Sebutkan alasan Anda..." 
+                                                oninput="saveOtherText('${q.id}', this.value)"
+                                                value="${userResponses[q.id + '_other'] || ''}"
+                                                class="w-full p-6 rounded-xl bg-black/40 border border-magenta-500/50 focus:border-magenta-500 focus:ring-2 focus:ring-magenta-500 outline-none font-mono text-sm text-white transition-all shadow-[0_0_10px_rgba(255,0,255,0.1)]"
+                                            >
+                                        </div>
+                                    ` : ''}
+                                </div>`;
+                        });
+                        html += `</div>`;
+                    } else if (q.type === 'single') {
+                        html += `<div class="grid grid-cols-1 gap-6">`;
+                        q.options.forEach(opt => {
+                            const isSelected = userResponses[q.id] === opt;
+                            html += `
+                                <div onclick="saveResponse('${q.id}', '${opt}')" 
+                                    class="checkbox-card p-6 rounded-2xl cursor-pointer flex items-center space-x-6 transition-all ${isSelected ? 'active' : ''}">
+                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-cyan-500 bg-cyan-500' : 'border-white/20 bg-white/5'}">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                                    </div>
+                                    <span class="text-xl font-medium ${isSelected ? 'text-white' : 'text-gray-400'}">${opt}</span>
+                                </div>`;
+                        });
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                });
+            } else if (step.type === 'open') {
+                step.questions.forEach(q => {
+                    html += `
+                        <div class="space-y-8">
+                            <label class="block text-2xl text-white font-bold flex items-center tracking-wide">
+                                <span class="w-12 h-12 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mr-6 font-mono text-xl">${q.id}</span>
+                                ${q.text}
+                            </label>
+                            <textarea oninput="saveOpenText('${q.id}', this.value)" 
+                                placeholder="Tuliskan jawaban Anda di sini..."
+                                class="w-full p-8 min-h-[220px] rounded-2xl outline-none border-0 ring-1 ring-white/10 focus:ring-2 focus:ring-cyan-500 transition-all font-mono text-xl leading-relaxed">${userResponses[q.id] || ''}</textarea>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div></div>`;
+            container.innerHTML = html;
+
+            document.getElementById('prev-btn').style.visibility = currentStepIndex === 0 ? 'hidden' : 'visible';
+            document.getElementById('next-btn').innerHTML = currentStepIndex === surveyData.steps.length - 1 ? 'UNGGAH_KE_MAINFRAME <i class="fas fa-upload ml-3"></i>' : 'Lanjut_Survey <i class="fas fa-chevron-right ml-3"></i>';
+            
+            checkValidity();
+        }
+
+        function saveIdentity(key, val) {
+            surveyData.identity[key] = val;
+            checkValidity();
+        }
+
+        function saveResponse(id, val) {
+            userResponses[id] = val;
+            renderStep();
+        }
+
+        function saveOtherText(id, val) {
+            userResponses[id + '_other'] = val;
+            checkValidity(); 
+        }
+
+        function saveOpenText(id, val) {
+            userResponses[id] = val;
+            checkValidity();
+        }
+
+        function toggleMulti(id, opt) {
+            if (!userResponses[id]) userResponses[id] = [];
+            const idx = userResponses[id].indexOf(opt);
+            if (idx > -1) {
+                userResponses[id].splice(idx, 1);
+                if (opt === 'Lainnya') delete userResponses[id + '_other'];
+            } else if (userResponses[id].length < 2) {
+                userResponses[id].push(opt);
+            }
+            renderStep();
+        }
+
+        function checkValidity() {
+            const step = surveyData.steps[currentStepIndex];
+            let isValid = true;
+            if (step.type === 'identity') isValid = surveyData.identity.gender && surveyData.identity.grade;
+            else if (step.type === 'likert') isValid = step.questions.every(q => userResponses[q.id]);
+            else if (step.type === 'mixed') {
+                isValid = step.questions.every(q => {
+                    if (q.type === 'multi') {
+                        const hasSelection = (userResponses[q.id] || []).length > 0;
+                        const otherSelected = (userResponses[q.id] || []).includes('Lainnya');
+                        if (otherSelected) return hasSelection && userResponses[q.id + '_other'] && userResponses[q.id + '_other'].trim().length > 0;
+                        return hasSelection;
+                    }
+                    return userResponses[q.id];
+                });
+            }
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = !isValid;
+            nextBtn.style.opacity = isValid ? '1' : '0.2';
+            nextBtn.style.filter = isValid ? 'none' : 'grayscale(1)';
+        }
+
+        function goToNextStep() {
+            if (currentStepIndex < surveyData.steps.length - 1) {
+                currentStepIndex++;
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                renderStep();
+            } else {
+                finishSurvey();
+            }
+        }
+
+        function goToPrevStep() {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                renderStep();
+            }
+        }
+
+        async function finishSurvey() {
+            if (!SCRIPT_URL || SCRIPT_URL === "ISI_DENGAN_URL_WEB_APP_ANDA") {
+                alert("Harap konfigurasi URL Google Apps Script terlebih dahulu!");
+                return;
+            }
+
+            document.getElementById('loading-ui').classList.remove('hidden');
+
+            const payload = {
+                identity: surveyData.identity,
+                responses: userResponses
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                document.getElementById('loading-ui').classList.add('hidden');
+                document.getElementById('success-screen').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert("Gagal mengirim data. Silakan periksa koneksi internet Anda.");
+                document.getElementById('loading-ui').classList.add('hidden');
+            }
+        }
+
+        function toggleModal(id) {
+            const m = document.getElementById(id);
+            m.classList.toggle('hidden');
+            m.classList.toggle('flex');
+        }
+
+        renderStep();
+    </script>
+</body>
+</html>
